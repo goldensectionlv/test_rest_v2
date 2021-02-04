@@ -161,7 +161,7 @@ def create_poll(request):
     return Response(serializer.data)
 
 
-poll_body = {
+example_poll_body = {
     "id": 36,
     "name": "update",
     "date_ends": "2021-02-06",
@@ -222,7 +222,7 @@ def add_question(request):
     return Response('Вопрос добавлен')
 
 
-update_question = {
+example_update_question = {
     "question_id": 50,
     "name": "question name23",
     "periodic_number": 5,
