@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
     path('get_poll/<int:poll_id>', views.get_poll),
     path('get_all_polls', views.get_all_polls),
-    path('get_users_polls/<int:user_id>', views.get_users_polls),
+    path('get_user_polls/<int:user_id>', views.get_user_polls),
 
     path('create_poll', views.create_poll),
     path('update_poll_body', views.update_poll_body),
@@ -17,5 +17,7 @@ urlpatterns = [
 
     path('add_question_option', views.add_question_option),
     path('update_question_option', views.update_question_option),
-    path('delete_question_option/<int:option_id>', views.delete_question_option)
+    path('delete_question_option/<int:option_id>', views.delete_question_option),
+
+    path('add_user_answer', views.add_user_answer)
 ]

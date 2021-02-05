@@ -29,8 +29,9 @@ def get_all_polls(request):
 
 
 @api_view(['GET'])
-def get_users_polls(request, user_id):
-    poll = Poll.objects.filter(poll_user_answers__user_id=user_id).all().prefetch_related('questions'). \
+def get_user_polls(request, user_id):
+    poll = Poll.objects.filter(questions__question_answers__user_id=user_id).order_by(
+        '-id').distinct().prefetch_related('questions'). \
         prefetch_related('questions__answers').prefetch_related(Prefetch('questions__answers__user_answers',
                                                                          queryset=UserAnswer.objects.filter(
                                                                              user_id=user_id)))
@@ -314,3 +315,67 @@ def delete_question_option(request, option_id):
 
 
 """END"""
+
+example_add_user_answer = {
+    "question_id": 53,
+    "answer_option_id": [84, 85, 86, 83],
+    "text": "optional for Text type of questions, empty if not text-type"
+}
+
+example_add_user_answer2 = {
+    "question_id": 53,
+    "answer_option_id": 51,
+    "text": "optional for Text type of questions, empty if not text-type"
+}
+
+
+@api_view(['POST'])
+def add_user_answer(request):
+    try:
+        question = Question.objects.get(id=request.data['question_id'])
+        answer = []
+        if question.type == 'ONE' or question.type == 'TEXT':
+            answer = Answer.objects.get(id=request.data['answer_option_id'])
+
+            if UserAnswer.objects.filter(answer=answer).exists():
+                return Response(f'Пользователь уже оставил ответ на этот вопрос')
+
+    except Answer.DoesNotExist:
+        return Response(f'Вариант ответа не найден', status.HTTP_404_NOT_FOUND)
+
+    except Question.DoesNotExist:
+        return Response(f'Вопрос не найден', status.HTTP_404_NOT_FOUND)
+
+    if question.type == 'ONE':
+        UserAnswer.objects.create(
+            user=request.user,
+            answer=answer,
+            question=question,
+            poll=question.poll
+        )
+    elif question.type == 'TEXT':
+        UserAnswer.objects.create(
+            user=request.user,
+            answer=answer,
+            question=question,
+            poll=question.poll,
+            text=request.data['text']
+        )
+    elif question.type == 'MANY':
+
+        check_is_answered = UserAnswer.objects.filter(user=request.user, question=question)
+        if len(check_is_answered) > 0:
+            return Response('Пользователь уже оставил ответ на этот вопрос')
+
+        list_of_ids = request.data['answer_option_id']
+        options_ids = Answer.objects.filter(id__in=list_of_ids)
+
+        for i in range(len(options_ids)):
+            UserAnswer.objects.create(
+                user=request.user,
+                answer=options_ids[i],
+                question=question,
+                poll=question.poll
+            )
+
+    return Response('Ответ добавлен')

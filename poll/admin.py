@@ -14,6 +14,12 @@ class AnswerInline(admin.TabularInline):
     extra = 0
 
 
+class UserAnswerInline(admin.TabularInline):
+    model = UserAnswer
+    readonly_fields = ['id', ]
+    extra = 0
+
+
 class QuestionInline(admin.StackedInline):
     model = Question
     inlines = [AnswerInline, ]
@@ -30,7 +36,7 @@ class PollAdmin(admin.ModelAdmin):
 
 class QuestionAdmin(admin.ModelAdmin):
     model = Question
-    inlines = [AnswerInline, ]
+    inlines = [AnswerInline, UserAnswerInline]
     readonly_fields = ['id', ]
     extra = 0
 

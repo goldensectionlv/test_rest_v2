@@ -6,7 +6,7 @@ from .models import *
 class UserAnswerSerializer(ModelSerializer):
     class Meta:
         model = UserAnswer
-        fields = ['id', 'user']
+        fields = ['id', 'user', 'text']
 
 
 class AnswerSerializer(ModelSerializer):

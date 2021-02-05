@@ -9,7 +9,7 @@ class Poll(models.Model):
     description = models.TextField()
 
     def __str__(self):
-        return self.name
+        return str(self.id) + ' ' + self.name
 
 
 class Question(models.Model):
@@ -27,7 +27,7 @@ class Question(models.Model):
     type = models.CharField(max_length=255, choices=QUESTION_TYPE, default=TEXT)
 
     def __str__(self):
-        return 'Вопрос: ' + self.name + '. Опрос: ' + self.poll.name
+        return str(self.id)
 
 
 class Answer(models.Model):
