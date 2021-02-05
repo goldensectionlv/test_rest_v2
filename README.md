@@ -22,5 +22,5 @@
 
 # Решение
 
-![схема](https://github.com/goldensectionlv/test_rest_v2/raw/master/image.png)
-
+![схема](https://github.com/goldensectionlv/test_rest_v2/raw/master/123.png)
+![alt text](123.png "схема")
