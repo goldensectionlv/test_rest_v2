@@ -7,6 +7,8 @@ from rest_framework.response import Response
 from .models import *
 from . import personal_serializers
 from . import serializers
+from . import swagger_requests
+from . import logic
 
 """Get info"""
 
@@ -47,148 +49,18 @@ def get_user_polls(request, user_id):
 """create, update, delete poll body"""
 
 
-def create_poll_object(poll_data):
-    poll_created = Poll.objects.create(
-        name=poll_data['name'],
-        date_starts=poll_data['date_starts'],
-        date_ends=poll_data['date_ends'],
-        description=poll_data['description']
-    )
-    return poll_created
-
-
-def add_questions_and_answers(poll, questions):
-    print(questions)
-    for i in range(len(questions)):
-        question = Question.objects.create(
-            poll=poll,
-            name=questions[i]['name'],
-            periodic_number=questions[i]['periodic_number'],
-            type=questions[i]['type']
-        )
-        answers = questions[i]['answers']
-        for z in range(len(answers)):
-            Answer.objects.create(
-                poll=poll,
-                question=question,
-                name=answers[z]['name'],
-                position=answers[z]['position']
-            )
-
-
-# пример данных, передаваемых, если включить добавление опроса + вопросы с вариантами одним запросом (+ add_questions_and_answers)
-example_create_poll_object = {
-    "poll": {
-        "name": "str",
-        "date_starts": "2021-02-03",
-        "date_ends": "2021-02-02",
-        "description": "str"
-    },
-    "questions": [
-        {
-            "name": "Первый вопрос",
-            "periodic_number": 1,
-            "type": "ONE",
-            "answers": [
-                {
-                    "name": "yes",
-                    "position": 1
-                },
-                {
-                    "name": "no",
-                    "position": 2
-                }
-            ]
-        },
-        {
-            "name": "Второй вопрос",
-            "periodic_number": 2,
-            "type": "MANY",
-            "answers": [
-                {
-                    "name": "1",
-                    "position": 1
-                },
-                {
-                    "name": "2",
-                    "position": 2
-                },
-                {
-                    "name": "3",
-                    "position": 3
-                },
-                {
-                    "name": "4",
-                    "position": 4
-                }
-            ]
-        },
-        {
-            "name": "Третий вопрос",
-            "periodic_number": 3,
-            "type": "ONE",
-            "answers": [
-                {
-                    "name": "yes",
-                    "position": 1
-                },
-                {
-                    "name": "no",
-                    "position": 2
-                }
-            ]
-        },
-        {
-            "name": "Четвертный",
-            "periodic_number": 4,
-            "type": "ONE",
-            "answers": [
-                {
-                    "name": "yes",
-                    "position": 1
-                },
-                {
-                    "name": "no",
-                    "position": 2
-                }
-            ]
-        }
-    ]
-}
-
-
-@swagger_auto_schema(method='post', operation_description="Создание тела опроса", request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя опроса'),
-        'date_starts': openapi.Schema(type=openapi.TYPE_STRING, description='дата начала. Пример: 2021-02-03'),
-        'date_ends': openapi.Schema(type=openapi.TYPE_STRING, description='дата окончания. Пример: 2021-02-06'),
-        'description': openapi.Schema(type=openapi.TYPE_STRING, description='описание'),
-    }))
+@swagger_auto_schema(method='post', operation_description="Создание тела опроса",
+                     request_body=swagger_requests.create_poll)
 @api_view(['POST'])
 def create_poll(request):
-    poll = create_poll_object(poll_data=request.data)
+    poll = logic.create_poll_object(poll_data=request.data)
     # add_questions_and_answers(poll=poll, questions=request.data['questions'])
     serializer = serializers.PollSerializer(poll, many=False)
     return Response(serializer.data)
 
 
-example_poll_body = {
-    "id": 36,
-    "name": "update",
-    "date_ends": "2021-02-06",
-    "description": "description"
-}
-
-
-@swagger_auto_schema(method='post', operation_description="Обновления тела опроса", request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя опроса'),
-        'date_ends': openapi.Schema(type=openapi.TYPE_STRING, description='дата окончания. Пример: 2021-02-06'),
-        'description': openapi.Schema(type=openapi.TYPE_STRING, description='описание'),
-    }))
+@swagger_auto_schema(method='post', operation_description="Обновления тела опроса",
+                     request_body=swagger_requests.update_poll_body)
 @api_view(['POST'])
 def update_poll_body(request):
     try:
@@ -218,23 +90,9 @@ def delete_poll(request, poll_id):
 """END"""
 
 """create, update, delete QUESTION"""
-example_question = {
-    "poll_id": 36,
-    "name": "question name",
-    "periodic_number": 1,
-    "type": "ONE"
-}
 
 
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'poll_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description='текст вопроса'),
-        'periodic_number': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер вопроса'),
-        'type': openapi.Schema(type=openapi.TYPE_STRING, description='тип (один из) "TEXT" / "ONE" / "MANY"',
-                               default='TEXT'),
-    }))
+@swagger_auto_schema(method='post', request_body=swagger_requests.add_question)
 @api_view(['POST'])
 def add_question(request):
     try:
@@ -251,22 +109,7 @@ def add_question(request):
     return Response('Вопрос добавлен')
 
 
-example_update_question = {
-    "question_id": 50,
-    "name": "question name23",
-    "periodic_number": 5,
-    "type": "ONE"
-}
-
-
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя вопроса'),
-        'periodic_number': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер вопроса'),
-        'type': openapi.Schema(type=openapi.TYPE_STRING, description='тип (один из) "TEXT" / "ONE" / "MANY"'),
-    }))
+@swagger_auto_schema(method='post', request_body=swagger_requests.update_question)
 @api_view(['POST'])
 def update_question(request):
     try:
@@ -296,21 +139,9 @@ def delete_question(request, question_id):
 
 """create, update, delete QUESTION ANSWER option"""
 
-example_question_option = {
-    "question_id": 50,
-    "position": 1,
-    "name": "Вариант 1"
-}
 
-
-@swagger_auto_schema(method='post', operation_description="Создание варианта ответа", request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
-        'position': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер варианта ответа',
-                                   default=1),
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description='текст варианта ответа'),
-    }))
+@swagger_auto_schema(method='post', operation_description="Создание варианта ответа",
+                     request_body=swagger_requests.add_question_option)
 @api_view(['POST'])
 def add_question_option(request):
     try:
@@ -327,20 +158,8 @@ def add_question_option(request):
     return Response('Опция ответа создана')
 
 
-example_update_question_option = {
-    "option_id": 78,
-    "position": 1,
-    "name": "Вариант Один"
-}
-
-
-@swagger_auto_schema(method='post', operation_description="Изменение варианта ответа", request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа на вопрос'),
-        'position': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер варианта ответа на вопрос'),
-        'name': openapi.Schema(type=openapi.TYPE_STRING, description='название варианта ответа на вопрос'),
-    }))
+@swagger_auto_schema(method='post', operation_description="Изменение варианта ответа",
+                     request_body=swagger_requests.update_question_option)
 @api_view(['POST'])
 def update_question_option(request):
     try:
@@ -367,27 +186,8 @@ def delete_question_option(request, option_id):
 
 """END"""
 
-example_add_user_answer = {
-    "question_id": 53,
-    "answer_option_id": [84, 85, 86, 83],
-    "text": "optional for Text type of questions, empty if not text-type"
-}
 
-example_add_user_answer2 = {
-    "question_id": 53,
-    "answer_option_id": 51,
-    "text": "optional for Text type of questions, empty if not text-type"
-}
-
-
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
-    type=openapi.TYPE_OBJECT,
-    properties={
-        'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
-        'answer_option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа или список id ответов'),
-        'type': openapi.Schema(type=openapi.TYPE_STRING,
-                               description='Текст только для текстовых ответов. Не обязательный')
-    }))
+@swagger_auto_schema(method='post', request_body=swagger_requests.add_user_answer)
 @api_view(['POST'])
 def add_user_answer(request):
     try:
