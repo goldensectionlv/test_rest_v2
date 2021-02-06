@@ -1,10 +1,12 @@
 from django.db.models import Prefetch
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import *
 from . import personal_serializers
-from . import base_serializers
+from . import serializers
 
 """Get info"""
 
@@ -16,7 +18,7 @@ def get_poll(request, poll_id):
     if poll is None:
         return Response(f'Опроса с id {poll_id} не найдено', status=status.HTTP_404_NOT_FOUND)
 
-    serializer = base_serializers.PollSerializer(poll, many=False)
+    serializer = serializers.PollSerializer(poll, many=False)
 
     return Response(serializer.data)
 
@@ -24,7 +26,7 @@ def get_poll(request, poll_id):
 @api_view(['GET'])
 def get_all_polls(request):
     poll = Poll.objects.order_by('-id').all().prefetch_related('questions').prefetch_related('questions__answers')
-    serializer = base_serializers.PollSerializer(poll, many=True)
+    serializer = serializers.PollSerializer(poll, many=True)
     return Response(serializer.data)
 
 
@@ -74,6 +76,7 @@ def add_questions_and_answers(poll, questions):
             )
 
 
+# пример данных, передаваемых, если включить добавление опроса + вопросы с вариантами одним запросом (+ add_questions_and_answers)
 example_create_poll_object = {
     "poll": {
         "name": "str",
@@ -154,11 +157,19 @@ example_create_poll_object = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя опроса'),
+        'date_starts': openapi.Schema(type=openapi.TYPE_STRING, description='дата начала. Пример: 2021-02-03'),
+        'date_ends': openapi.Schema(type=openapi.TYPE_STRING, description='дата окончания. Пример: 2021-02-06'),
+        'description': openapi.Schema(type=openapi.TYPE_STRING, description='описание'),
+    }))
 @api_view(['POST'])
 def create_poll(request):
-    poll = create_poll_object(poll_data=request.data['poll'])
-    add_questions_and_answers(poll=poll, questions=request.data['questions'])
-    serializer = base_serializers.PollSerializer(poll, many=False)
+    poll = create_poll_object(poll_data=request.data)
+    # add_questions_and_answers(poll=poll, questions=request.data['questions'])
+    serializer = serializers.PollSerializer(poll, many=False)
     return Response(serializer.data)
 
 
@@ -170,6 +181,14 @@ example_poll_body = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
+        'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя опроса'),
+        'date_ends': openapi.Schema(type=openapi.TYPE_STRING, description='дата окончания. Пример: 2021-02-06'),
+        'description': openapi.Schema(type=openapi.TYPE_STRING, description='описание'),
+    }))
 @api_view(['POST'])
 def update_poll_body(request):
     try:
@@ -182,7 +201,7 @@ def update_poll_body(request):
     poll.description = request.data['description']
     poll.save()
 
-    serializer = base_serializers.PollBodySerializer(poll, many=False)
+    serializer = serializers.PollBodySerializer(poll, many=False)
     return Response(serializer.data)
 
 
@@ -207,6 +226,15 @@ example_question = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'poll_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
+        'name': openapi.Schema(type=openapi.TYPE_STRING, description='текст вопроса'),
+        'periodic_number': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер вопроса'),
+        'type': openapi.Schema(type=openapi.TYPE_STRING, description='тип (один из) "TEXT" / "ONE" / "MANY"',
+                               default='TEXT'),
+    }))
 @api_view(['POST'])
 def add_question(request):
     try:
@@ -231,6 +259,14 @@ example_update_question = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
+        'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя вопроса'),
+        'periodic_number': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер вопроса'),
+        'type': openapi.Schema(type=openapi.TYPE_STRING, description='тип (один из) "TEXT" / "ONE" / "MANY"'),
+    }))
 @api_view(['POST'])
 def update_question(request):
     try:
@@ -267,6 +303,14 @@ example_question_option = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
+        'position': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер варианта ответа',
+                                   default=1),
+        'name': openapi.Schema(type=openapi.TYPE_STRING, description='текст варианта ответа'),
+    }))
 @api_view(['POST'])
 def add_question_option(request):
     try:
@@ -290,6 +334,13 @@ example_update_question_option = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа на вопрос'),
+        'position': openapi.Schema(type=openapi.TYPE_INTEGER, description='порядковый номер варианта ответа на вопрос'),
+        'name': openapi.Schema(type=openapi.TYPE_STRING, description='название варианта ответа на вопрос'),
+    }))
 @api_view(['POST'])
 def update_question_option(request):
     try:
@@ -329,6 +380,14 @@ example_add_user_answer2 = {
 }
 
 
+@swagger_auto_schema(method='post', request_body=openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    properties={
+        'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
+        'answer_option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа'),
+        'type': openapi.Schema(type=openapi.TYPE_STRING,
+                               description='Текст только для текстовых ответов. Не обязательный')
+    }))
 @api_view(['POST'])
 def add_user_answer(request):
     try:
