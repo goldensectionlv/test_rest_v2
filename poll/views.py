@@ -157,7 +157,7 @@ example_create_poll_object = {
 }
 
 
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
+@swagger_auto_schema(method='post', operation_description="Создание тела опроса", request_body=openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'name': openapi.Schema(type=openapi.TYPE_STRING, description='имя опроса'),
@@ -181,7 +181,7 @@ example_poll_body = {
 }
 
 
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
+@swagger_auto_schema(method='post', operation_description="Обновления тела опроса", request_body=openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id опроса'),
@@ -303,7 +303,7 @@ example_question_option = {
 }
 
 
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
+@swagger_auto_schema(method='post', operation_description="Создание варианта ответа", request_body=openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
@@ -334,7 +334,7 @@ example_update_question_option = {
 }
 
 
-@swagger_auto_schema(method='post', request_body=openapi.Schema(
+@swagger_auto_schema(method='post', operation_description="Изменение варианта ответа", request_body=openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа на вопрос'),
@@ -384,7 +384,7 @@ example_add_user_answer2 = {
     type=openapi.TYPE_OBJECT,
     properties={
         'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
-        'answer_option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа'),
+        'answer_option_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id варианта ответа или список id ответов'),
         'type': openapi.Schema(type=openapi.TYPE_STRING,
                                description='Текст только для текстовых ответов. Не обязательный')
     }))
