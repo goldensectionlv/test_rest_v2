@@ -73,13 +73,24 @@ WSGI_APPLICATION = 'test_poll.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
+#         'NAME': 'poll_db1',
+#         'USER': 'poll_admin',
+#         'PASSWORD': '',
+#         'HOST': 'localhost',
+#         'PORT': '5432'
+#     }
+# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'poll_db1',
-        'USER': 'poll_admin',
-        'PASSWORD': '',
-        'HOST': 'localhost',
+        'NAME': 'd4apt89o00iqlm',
+        'USER': 'dbpvwsxstgbmeo',
+        'PASSWORD': 'a07797dfad0111f9a3650a2d1e420e3f4dcaf66eaefa7fc732fe1d6ec875c435',
+        'HOST': 'ec2-108-128-104-50.eu-west-1.compute.amazonaws.com',
         'PORT': '5432'
     }
 }
