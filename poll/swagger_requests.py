@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 
-# пример данных, передаваемых, если включить добавление опроса + вопросы с вариантами одним запросом (+ add_questions_and_answers)
+# пример данных, передаваемых, если включить добавление опроса + вопросы с вариантами одним запросом (.logic / add_questions_and_answers)
 example_create_poll_object = {
     "poll": {
         "name": "str",
