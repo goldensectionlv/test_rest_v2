@@ -27,4 +27,6 @@
 
 ### Документация : https://djang-test-rest-v2.herokuapp.com/
 
+Тестовый id usera: 1
+
 ### Url для методов: https://djang-test-rest-v2.herokuapp.com/api/{method_name}
