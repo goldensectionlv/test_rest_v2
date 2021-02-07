@@ -77,7 +77,7 @@ def update_poll_body(request):
     return Response(serializer.data)
 
 
-@api_view(['GET'])
+@api_view(['delete'])
 def delete_poll(request, poll_id):
     try:
         poll = Poll.objects.get(id=poll_id)
@@ -125,7 +125,7 @@ def update_question(request):
     return Response('Вопрос обновлен')
 
 
-@api_view(['GET'])
+@api_view(['delete'])
 def delete_question(request, question_id):
     try:
         question = Question.objects.get(id=question_id)
@@ -174,7 +174,7 @@ def update_question_option(request):
     return Response('Опция ответа изменена')
 
 
-@api_view(['GET'])
+@api_view(['delete'])
 def delete_question_option(request, option_id):
     try:
         answer = Answer.objects.get(id=option_id)
@@ -228,13 +228,11 @@ def add_user_answer(request):
 
         list_of_ids = request.data['answer_option_id']
         options_ids = Answer.objects.filter(id__in=list_of_ids)
-
+        bulk_list = []
         for i in range(len(options_ids)):
-            UserAnswer.objects.create(
-                user=request.user,
-                answer=options_ids[i],
-                question=question,
-                poll=question.poll
+            bulk_list.append(
+                (UserAnswer(user=request.user, answer=options_ids[i], question=question, poll=question.poll))
             )
+        UserAnswer.objects.bulk_create(bulk_list)
 
     return Response('Ответ добавлен')

@@ -27,3 +27,4 @@ def add_questions_and_answers(poll, questions):
                 name=answers[z]['name'],
                 position=answers[z]['position']
             )
+
