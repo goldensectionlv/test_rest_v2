@@ -22,4 +22,11 @@
 
 # Решение
 
+### Схема
 ![схема](https://github.com/goldensectionlv/test_rest_v2/raw/master/123.png)
+
+### Документация : https://djang-test-rest-v2.herokuapp.com/
+
+Тестовый user_id: 1
+
+### Url для методов: https://djang-test-rest-v2.herokuapp.com/api/{method_name}
