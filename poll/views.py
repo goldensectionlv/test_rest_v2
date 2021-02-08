@@ -186,7 +186,9 @@ def delete_question_option(request, option_id):
 """END"""
 
 
-@swagger_auto_schema(method='post', request_body=swagger_requests.add_user_answer)
+@swagger_auto_schema(method='post',
+                     operation_description="Чтобы добавить ответ, нужна авторизация в админке: log/pass: admin / admin",
+                     request_body=swagger_requests.add_user_answer)
 @api_view(['POST'])
 def add_user_answer(request):
     try:

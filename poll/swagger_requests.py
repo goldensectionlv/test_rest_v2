@@ -181,7 +181,6 @@ example_add_user_answer2 = {
 
 add_user_answer = openapi.Schema(
     type=openapi.TYPE_OBJECT,
-    description="Чтобы добавить ответ, нужна авторизация в админке: log/pass: admin / admin",
     properties={
         'question_id': openapi.Schema(type=openapi.TYPE_INTEGER, description='id вопроса'),
         'answer_option_id': openapi.Schema(type=openapi.TYPE_INTEGER,
